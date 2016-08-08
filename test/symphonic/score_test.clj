@@ -13,7 +13,6 @@
   src/Service
   (get-name [this] name)
   (receive [this topic msg]
-    (prn :test-service/receive name topic msg)
     (async/go (async/>! on-receive {:name (src/get-name this) :topic topic :msg msg})))
   (start [this]
     (doseq [topic (:out config)]
@@ -27,14 +26,14 @@
 (specification "A Test"
   (behavior "FIXME, I fail."
     (let [test-chan (async/chan)
-          servs (src/make-services example-config src/make-async-peer (make-test-service test-chan))]
+          servs (src/make-async-services example-config src/make-async-peer (make-test-service test-chan))]
       (src/start-services servs)
       (assertions
         (sort-by :name
                  (async/<!!
                    (let [take-test-chan (async/take 2 test-chan)]
                      (async/go-loop [msgs []]
-                       (let [[msg] (async/alts! [take-test-chan (async/timeout 2000)])]
+                       (let [[msg] (async/alts! [take-test-chan (async/timeout 500)])]
                          (if msg
                            (recur (conj msgs msg))
                            msgs))))))
