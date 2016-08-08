@@ -25,18 +25,19 @@
 
 (specification "A Test"
   (behavior "FIXME, I fail."
-    (let [test-chan (async/chan)
-          servs (src/make-async-services example-config src/make-async-peer (make-test-service test-chan))]
-      (src/start-services servs)
-      (assertions
-        (sort-by :name
-                 (async/<!!
-                   (let [take-test-chan (async/take 2 test-chan)]
-                     (async/go-loop [msgs []]
-                       (let [[msg] (async/alts! [take-test-chan (async/timeout 500)])]
-                         (if msg
-                           (recur (conj msgs msg))
-                           msgs))))))
-        => [{:name :A :topic :A :msg "Hello :A"}
-            {:name :B :topic :B :msg "Hello :B"}])
-      (src/stop-services servs))))
+    (doseq [_ (range 50)]
+      (let [test-chan (async/chan)
+            servs (src/make-async-services example-config src/make-async-peer (make-test-service test-chan))]
+        (src/start-services servs)
+        (assertions
+          (sort-by :name
+                   (async/<!!
+                     (let [take-test-chan (async/take 2 test-chan)]
+                       (async/go-loop [msgs []]
+                         (let [[msg] (async/alts! [take-test-chan (async/timeout 500)])]
+                           (if msg
+                             (recur (conj msgs msg))
+                             msgs))))))
+          => [{:name :A :topic :A :msg "Hello :A"}
+              {:name :B :topic :B :msg "Hello :B"}])
+        (src/stop-services servs)))))

@@ -28,7 +28,7 @@
 
 (defn start-services [services]
   (doseq [s services]
-    (.start (Thread. (fn [] (init (:peer s)) (start s))))))
+    (async/thread (init (:peer s)) (start s))))
 
 (defn stop-services [services]
   (doseq [s services]
