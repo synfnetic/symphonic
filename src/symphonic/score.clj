@@ -28,7 +28,9 @@
 
 (defn start-services [services]
   (doseq [s services]
-    (async/thread (init (:peer s)) (start s))))
+    (init (:peer s)))
+  (doseq [s services]
+    (async/thread (start s))))
 
 (defn stop-services [services]
   (doseq [s services]
@@ -51,7 +53,6 @@
           (doseq [c chans]
             (async/close! c))
           (recur)))
-      (Thread/sleep 100)
       this))
 
   (send [this topic message]
